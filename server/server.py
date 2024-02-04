@@ -21,7 +21,7 @@ def init_db():
     with open(DB_INIT_FILE, 'r') as db_init_file:
         con = sqlite3.connect('onair.db')
         cur = con.cursor()
-        cur.execute(db_init_file.readlines())
+        cur.execute(db_init_file.read())
         con.commit()
         con.close()
 
