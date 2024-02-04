@@ -17,7 +17,7 @@ app = Flask(__name__)
 def init_db():
     con = sqlite3.connect('onair.db')
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS signs(url TEXT PRIMARY KEY, last_successful_ts INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS signs(url TEXT PRIMARY KEY, registered_ts INTEGER, last_successful_ts INTEGER)")
     con.commit()
     con.close()
 
@@ -48,7 +48,7 @@ def register_sign(url, state):
     cur = con.cursor()
 
     if state:
-        cur.execute("INSERT INTO signs VALUES (:url, :date) ON CONFLICT(url) DO UPDATE", data)
+        cur.execute("INSERT INTO signs VALUES (:url, :date) ON CONFLICT(url) DO UPDATE SET registered_ts=:date", data)
     else:
         cur.execute("DELETE FROM signs WHERE url=:url", data)
     
