@@ -36,13 +36,19 @@ def state_change(old, new):
     return new
 
 def register_client(url, state):
+
+    data = {
+        'url': str(url),
+        'date': time.time()
+    }
+
     con = sqlite3.connect('onair.db')
     cur = con.cursor()
 
     if state:
-        cur.execute("INSERT INTO signs VALUES (?, ?)", url, time.time())
+        cur.execute("INSERT INTO signs VALUES (:url, :date)", data)
     else:
-        cur.execute("DELETE FROM signs WHERE url=?", url)
+        cur.execute("DELETE FROM signs WHERE url=:url", data)
     
     con.commit()
     con.close()
