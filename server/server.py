@@ -48,7 +48,7 @@ def register_sign(url, state):
     cur = con.cursor()
 
     if state:
-        cur.execute("INSERT INTO signs VALUES (:url, :date) ON CONFLICT(url) DO UPDATE SET registered_ts=:date", data)
+        cur.execute("INSERT INTO signs(url, registered_ts) VALUES (:url, :date) ON CONFLICT(url) DO UPDATE SET registered_ts=:date", data)
     else:
         cur.execute("DELETE FROM signs WHERE url=:url", data)
     
