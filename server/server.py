@@ -35,7 +35,7 @@ def state_change(old, new):
         state_file.write(json.dumps(new))
     return new
 
-def register_client(url, state):
+def register_sign(url, state):
 
     validators.url(url)
 
@@ -56,6 +56,16 @@ def register_client(url, state):
     con.close()
 
     return state
+
+def get_signs(newer_than=None):
+    con = sqlite3.connect('onair.db')
+    cur = con.cursor()
+    res = cur.execute("SELECT * FROM signs WHERE last_successful_ts>?", newer_than ? newer_than : 0)
+    signs = res.fetchall()
+    con.close()
+    
+    return signs
+
 
 @app.route(f"{API_URL}/state", methods=['GET'])
 def get_state():
@@ -78,8 +88,11 @@ def set_state():
 @app.route(f"{API_URL}/register", methods=['POST'])
 def register():
     # get desired callback point (should parse to a url)
-    client_text = json.loads(request.data.decode('utf-8'))    
-    return jsonify(register_client(client_text, True))
+    client_text = json.loads(request.data.decode('utf-8'))
+
+    register_sign(client_text, True)
+
+    return jsonify(get_signs())
 
 if __name__ == '__main__':
     init_db()
