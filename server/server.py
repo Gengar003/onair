@@ -2,8 +2,8 @@ import os
 import json
 import subprocess
 import sqlite3
-import urllib
 import time
+import validators
 
 from flask import Flask, jsonify, request
 
@@ -37,8 +37,10 @@ def state_change(old, new):
 
 def register_client(url, state):
 
+    validators.url(url)
+
     data = {
-        'url': str(url),
+        'url': url,
         'date': time.time()
     }
 
@@ -76,9 +78,8 @@ def set_state():
 @app.route(f"{API_URL}/register", methods=['POST'])
 def register():
     # get desired callback point (should parse to a url)
-    client_text = json.loads(request.data.decode('utf-8'))
-    client_url = urllib.parse.urlparse(client_text)
-    return jsonify(register_client(client_url, True))
+    client_text = json.loads(request.data.decode('utf-8'))    
+    return jsonify(register_client(client_text, True))
 
 if __name__ == '__main__':
     init_db()
