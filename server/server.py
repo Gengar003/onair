@@ -98,6 +98,9 @@ def notify_signs(signs, state):
                 })
                 new_failures = res.fetchone()['num_failures']
                 print(f"\tFailed {new_failures} times.")
+        finally:
+            con.commit()
+            con.close()
             
 
 @app.route(f"{API_URL}/state", methods=['GET'])
