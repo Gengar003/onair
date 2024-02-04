@@ -60,7 +60,7 @@ def register_sign(url, state):
 def get_signs(newer_than=None):
     con = sqlite3.connect('onair.db')
     cur = con.cursor()
-    res = cur.execute("SELECT * FROM signs WHERE last_successful_ts>?", newer_than if newer_than else 0)
+    res = cur.execute("SELECT * FROM signs WHERE last_successful_ts>?", str(newer_than if newer_than is not None else 0))
     signs = res.fetchall()
     con.close()
     
