@@ -73,7 +73,7 @@ def get_signs(newer_than=None):
     signs = res.fetchall()
     con.close()
     
-    return signs
+    return [dict(row) for row in signs]
 
 def notify_signs(signs, state):
     con = sqlite3.connect(DB_FILE)
