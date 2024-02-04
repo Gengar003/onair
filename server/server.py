@@ -87,7 +87,7 @@ def notify_signs(signs, state):
             })
         except BaseException as be:
             if sign['num_failures'] + 1 >= MAX_FAILURES:
-                print(f"Dropping sign {sign['url']; it has failed too many ({sign['num_failures']+1}) times.}")
+                print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
                 cur.execute("DELETE FROM signs WHERE url=?", sign['url'])
             else:
                 print(f"Sign {sign['url']} failed; incrementing its failure count.")
