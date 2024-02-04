@@ -91,7 +91,7 @@ def notify_signs(signs, state):
                 cur.execute("DELETE FROM signs WHERE url=?", sign['url'])
             else:
                 print(f"Sign {sign['url']} failed; incrementing its failure count.")
-                res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING signs.*",{
+                res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
                     "url": sign['url'],
                     "date": int(time.time())
                 })
