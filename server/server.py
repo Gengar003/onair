@@ -1,7 +1,7 @@
 import os
 import json
 import subprocess
-import sqlite
+import sqlite3
 import urllib
 
 from flask import Flask, jsonify, request
