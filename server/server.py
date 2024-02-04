@@ -114,6 +114,8 @@ def get_state():
 def set_state():
     old_state = get_state()
     new_state = json.loads(request.data.decode('utf-8'))
+
+    notify_signs(get_signs(), new_state)
     
     return jsonify(state_change(old_state, new_state))
 
