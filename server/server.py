@@ -3,6 +3,7 @@ import json
 import subprocess
 import sqlite3
 import urllib
+import time
 
 from flask import Flask, jsonify, request
 
@@ -12,6 +13,13 @@ API_VERSION = "v1"
 API_URL = f"{API_BASE}/{API_VERSION}"
 
 app = Flask(__name__)
+
+def init_db():
+    con = sqlite3.connect('onair.db')
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS signs(url, last_successful_ts)")
+    con.commit()
+    con.close()
 
 def state_change(old, new):
     
@@ -26,6 +34,20 @@ def state_change(old, new):
     with open(STATE_FILE, "w") as state_file:
         state_file.write(json.dumps(new))
     return new
+
+def register_client(url, state):
+    con = sqlite3.connect('onair.db')
+    cur = con.cursor()
+
+    if state:
+        cur.execute("INSERT INTO signs VALUES (?, ?)", url, time.time())
+    else:
+        cur.execute("DELETE FROM signs WHERE url=?", url)
+    
+    con.commit()
+    con.close()
+
+    return state
 
 @app.route(f"{API_URL}/state", methods=['GET'])
 def get_state():
@@ -46,14 +68,12 @@ def set_state():
     return jsonify(state_change(old_state, new_state))
 
 @app.route(f"{API_URL}/register", methods=['POST'])
-def register_sign():
+def register():
     # get desired callback point (should parse to a url)
     client_text = json.loads(request.data.decode('utf-8'))
     client_url = urllib.parse.urlparse(client_text)
-    print("would register url: " + client_url)
-
-
-    pass
+    return jsonify(register_client(client_url, True))
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host="0.0.0.0")
