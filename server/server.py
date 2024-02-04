@@ -93,13 +93,11 @@ def notify_signs(signs: list, state: bool):
                         "url": sign['url']
                     } )
                 else:
-                    print(f"Sign {sign['url']} failed; incrementing its failure count.")
+                    print(f"Sign {sign['url']} failed; incrementing its failure count to [{sign['num_failures']+1}].")
                     res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
                         "url": sign['url'],
                         "date": int(time.time())
                     })
-                    new_failures = res.fetchone()['num_failures']
-                    print(f"\tFailed {new_failures} times.")
             
 
 @app.route(f"{API_URL}/state", methods=['GET'])
