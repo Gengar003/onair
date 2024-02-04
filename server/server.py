@@ -4,11 +4,15 @@ import subprocess
 import sqlite3
 import time
 import validators
+import requests
 
 from flask import Flask, jsonify, request
 
 STATE_FILE = "onair-state.dat"
 DB_INIT_FILE = "db-init.sql"
+DB_FILE = "onair.db"
+
+MAX_FAILURES=3
 
 API_BASE = "/onair/api"
 API_VERSION = "v1"
@@ -19,7 +23,7 @@ app = Flask(__name__)
 def init_db():
 
     with open(DB_INIT_FILE, 'r') as db_init_file:
-        con = sqlite3.connect('onair.db')
+        con = sqlite3.connect(DB_FILE)
         cur = con.cursor()
         cur.execute(db_init_file.read())
         con.commit()
@@ -48,7 +52,7 @@ def register_sign(url, state):
         'date': int(time.time())
     }
 
-    con = sqlite3.connect('onair.db')
+    con = sqlite3.connect(DB_FILE)
     cur = con.cursor()
 
     if state:
@@ -62,7 +66,8 @@ def register_sign(url, state):
     return state
 
 def get_signs(newer_than=None):
-    con = sqlite3.connect('onair.db')
+    con = sqlite3.connect(DB_FILE)
+    con.row_factory = sqlite3.Row
     cur = con.cursor()
     res = cur.execute("SELECT * FROM signs WHERE last_successful_ts>=?", str(newer_than if newer_than is not None else 0))
     signs = res.fetchall()
@@ -70,6 +75,29 @@ def get_signs(newer_than=None):
     
     return signs
 
+def notify_signs(signs, state):
+    con = sqlite3.connect(DB_FILE)
+    cur = con.cursor()
+    for sign in signs:
+        try:
+            response = requests.put(f"{sign[0]}", data=state)
+            cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
+                "url": sign['url'],
+                "date": int(time.time())
+            })
+        except BaseException as be:
+            if sign['num_failures'] + 1 >= MAX_FAILURES:
+                print(f"Dropping sign {sign['url']; it has failed too many ({sign['num_failures']+1}) times.}")
+                cur.execute("DELETE FROM signs WHERE url=?", sign['url'])
+            else:
+                print(f"Sign {sign['url']} failed; incrementing its failure count.")
+                res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
+                    "url": sign['url'],
+                    "date": int(time.time())
+                })
+                new_failures = res.fetchone()
+                print(f"\tFailed {new_failures} times.")
+            
 
 @app.route(f"{API_URL}/state", methods=['GET'])
 def get_state():
