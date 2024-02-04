@@ -74,7 +74,7 @@ def get_signs(newer_than=None):
     
     return [dict(row) for row in signs]
 
-def notify_signs(signs, state):
+def notify_signs(signs: list, state: bool):
     with database() as con:
         cur = con.cursor()
         for sign in signs:
@@ -89,7 +89,9 @@ def notify_signs(signs, state):
             except BaseException as be:
                 if sign['num_failures'] + 1 >= MAX_FAILURES:
                     print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
-                    cur.execute("DELETE FROM signs WHERE url=? LIMIT 1", str(sign['url']))
+                    cur.execute("DELETE FROM signs WHERE url=:url LIMIT 1", {
+                        "url": sign['url']
+                    } )
                 else:
                     print(f"Sign {sign['url']} failed; incrementing its failure count.")
                     res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
@@ -116,9 +118,10 @@ def set_state():
     old_state = get_state()
     new_state = json.loads(request.data.decode('utf-8'))
 
-    notify_signs(get_signs(), new_state)
+    changed = state_change(old_state, new_state)
+    notify_signs(get_signs(), changed)
     
-    return jsonify(state_change(old_state, new_state))
+    return jsonify(changed)
 
 @app.route(f"{API_URL}/register", methods=['POST'])
 def register():
