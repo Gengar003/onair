@@ -20,14 +20,17 @@ API_URL = f"{API_BASE}/{API_VERSION}"
 
 app = Flask(__name__)
 
+
+def database():
+    con = sqlite3.connect(DB_FILE, isolation_level=None)
+    con.row_factory = sqlite3.Row
+
 def init_db():
 
     with open(DB_INIT_FILE, 'r') as db_init_file:
-        con = sqlite3.connect(DB_FILE)
-        cur = con.cursor()
-        cur.execute(db_init_file.read())
-        con.commit()
-        con.close()
+        with database() as con:
+            cur = con.cursor()
+            cur.execute(db_init_file.read())
 
 def state_change(old, new):
     
@@ -52,55 +55,46 @@ def register_sign(url, state):
         'date': int(time.time())
     }
 
-    con = sqlite3.connect(DB_FILE)
-    cur = con.cursor()
+    with database() as con:
+        cur = con.cursor()
 
-    if state:
-        cur.execute("INSERT INTO signs(url, registered_ts) VALUES (:url, :date) ON CONFLICT(url) DO UPDATE SET registered_ts=:date", data)
-    else:
-        cur.execute("DELETE FROM signs WHERE url=:url", data)
-    
-    con.commit()
-    con.close()
+        if state:
+            cur.execute("INSERT INTO signs(url, registered_ts) VALUES (:url, :date) ON CONFLICT(url) DO UPDATE SET registered_ts=:date", data)
+        else:
+            cur.execute("DELETE FROM signs WHERE url=:url", data)
 
     return state
 
 def get_signs(newer_than=None):
-    con = sqlite3.connect(DB_FILE)
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
-    res = cur.execute("SELECT * FROM signs WHERE last_successful_ts>=?", str(newer_than if newer_than is not None else 0))
-    signs = res.fetchall()
-    con.close()
+    with database() as con:
+        cur = con.cursor()
+        res = cur.execute("SELECT * FROM signs WHERE last_successful_ts>=?", str(newer_than if newer_than is not None else 0))
+        signs = res.fetchall()
     
     return [dict(row) for row in signs]
 
 def notify_signs(signs, state):
-    con = sqlite3.connect(DB_FILE)
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
-    for sign in signs:
-        try:
-            response = requests.put(f"{sign[0]}", data=state)
-            cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
-                "url": sign['url'],
-                "date": int(time.time())
-            })
-        except BaseException as be:
-            if sign['num_failures'] + 1 >= MAX_FAILURES:
-                print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
-                cur.execute("DELETE FROM signs WHERE url=?", sign['url'])
-            else:
-                print(f"Sign {sign['url']} failed; incrementing its failure count.")
-                res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
+    with database() as con:
+        cur = con.cursor()
+        for sign in signs:
+            try:
+                response = requests.put(f"{sign[0]}", data=state)
+                cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
                     "url": sign['url'],
                     "date": int(time.time())
                 })
-                new_failures = res.fetchone()['num_failures']
-                print(f"\tFailed {new_failures} times.")
-        finally:
-            con.commit()
-            con.close()
+            except BaseException as be:
+                if sign['num_failures'] + 1 >= MAX_FAILURES:
+                    print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
+                    cur.execute("DELETE FROM signs WHERE url=?", sign['url'])
+                else:
+                    print(f"Sign {sign['url']} failed; incrementing its failure count.")
+                    res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
+                        "url": sign['url'],
+                        "date": int(time.time())
+                    })
+                    new_failures = res.fetchone()['num_failures']
+                    print(f"\tFailed {new_failures} times.")
             
 
 @app.route(f"{API_URL}/state", methods=['GET'])
