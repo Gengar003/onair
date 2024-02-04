@@ -77,6 +77,7 @@ def get_signs(newer_than=None):
 
 def notify_signs(signs, state):
     con = sqlite3.connect(DB_FILE)
+    con.row_factory = sqlite3.Row
     cur = con.cursor()
     for sign in signs:
         try:
