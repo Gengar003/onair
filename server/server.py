@@ -78,6 +78,8 @@ def notify_signs(signs, state):
     with database() as con:
         cur = con.cursor()
         for sign in signs:
+            print("Processing sign:")
+            print(sign)
             try:
                 response = requests.put(f"{sign[0]}", data=state)
                 cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
@@ -87,7 +89,7 @@ def notify_signs(signs, state):
             except BaseException as be:
                 if sign['num_failures'] + 1 >= MAX_FAILURES:
                     print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
-                    cur.execute("DELETE FROM signs WHERE url=?", sign['url'])
+                    cur.execute("DELETE FROM signs WHERE url=? LIMIT 1", sign['url'])
                 else:
                     print(f"Sign {sign['url']} failed; incrementing its failure count.")
                     res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
