@@ -8,6 +8,8 @@ import validators
 from flask import Flask, jsonify, request
 
 STATE_FILE = "onair-state.dat"
+DB_INIT_FILE = "db-init.sql"
+
 API_BASE = "/onair/api"
 API_VERSION = "v1"
 API_URL = f"{API_BASE}/{API_VERSION}"
@@ -15,11 +17,13 @@ API_URL = f"{API_BASE}/{API_VERSION}"
 app = Flask(__name__)
 
 def init_db():
-    con = sqlite3.connect('onair.db')
-    cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS signs(url TEXT PRIMARY KEY, registered_ts INTEGER, last_successful_ts INTEGER DEFAULT 0)")
-    con.commit()
-    con.close()
+
+    with open(DB_INIT_FILE, 'r') as db_init_file:
+        con = sqlite3.connect('onair.db')
+        cur = con.cursor()
+        cur.execute(db_init_file.readlines())
+        con.commit()
+        con.close()
 
 def state_change(old, new):
     
