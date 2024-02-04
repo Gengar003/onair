@@ -24,6 +24,7 @@ app = Flask(__name__)
 def database():
     con = sqlite3.connect(DB_FILE, isolation_level=None)
     con.row_factory = sqlite3.Row
+    return con
 
 def init_db():
 
