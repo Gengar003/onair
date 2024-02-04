@@ -17,7 +17,7 @@ app = Flask(__name__)
 def init_db():
     con = sqlite3.connect('onair.db')
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS signs(url, last_successful_ts)")
+    cur.execute("CREATE TABLE IF NOT EXISTS signs(url TEXT, last_successful_ts INTEGER)")
     con.commit()
     con.close()
 
