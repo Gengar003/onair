@@ -81,7 +81,7 @@ def notify_signs(signs, state):
             print("Processing sign:")
             print(sign)
             try:
-                response = requests.put(sign['url'], data=state)
+                response = requests.put(sign['url'], data=jsonify(state))
                 cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
                     "url": sign['url'],
                     "date": int(time.time())
