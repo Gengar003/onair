@@ -2,11 +2,15 @@ import os
 import json
 import subprocess
 import sqlite3
+<<<<<<< HEAD
 import time
 import validators
 import requests
 import traceback
 import argparse
+=======
+import urllib
+>>>>>>> cc7cb59 (its sqlite3)
 
 from flask import Flask, jsonify, request
 
