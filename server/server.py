@@ -17,7 +17,7 @@ app = Flask(__name__)
 def init_db():
     con = sqlite3.connect('onair.db')
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS signs(url TEXT, last_successful_ts INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS signs(url TEXT PRIMARY KEY, last_successful_ts INTEGER)")
     con.commit()
     con.close()
 
@@ -41,7 +41,7 @@ def register_sign(url, state):
 
     data = {
         'url': url,
-        'date': time.time()
+        'date': int(time.time())
     }
 
     con = sqlite3.connect('onair.db')
