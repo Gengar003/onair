@@ -1,9 +1,6 @@
 import os
 import json
 import subprocess
-import sqlite3
-import time
-import validators
 import requests
 import argparse
 import socket
