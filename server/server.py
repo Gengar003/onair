@@ -20,12 +20,15 @@ API_URL = f"{API_BASE}/{API_VERSION}"
 
 app = Flask(__name__)
 
-
+# helper to get a database connection
+# use with database() as con:
+# to ensure it always closes
 def database():
     con = sqlite3.connect(DB_FILE, isolation_level=None)
     con.row_factory = sqlite3.Row
     return con
 
+# only call once: set up the DB if no DB exists
 def init_db():
 
     with open(DB_INIT_FILE, 'r') as db_init_file:
@@ -33,6 +36,7 @@ def init_db():
             cur = con.cursor()
             cur.execute(db_init_file.read())
 
+# change the server's state
 def state_change(old, new):
     
     # TODO: actually evince the change
@@ -47,6 +51,7 @@ def state_change(old, new):
         state_file.write(json.dumps(new))
     return new
 
+# register a new sign for push notifications
 def register_sign(url, state):
 
     validators.url(url)
@@ -66,6 +71,7 @@ def register_sign(url, state):
 
     return state
 
+# list all signs with their details
 def get_signs(newer_than=None):
     with database() as con:
         cur = con.cursor()
@@ -74,12 +80,12 @@ def get_signs(newer_than=None):
     
     return [dict(row) for row in signs]
 
+# notify all signs
+# drop any that have failed a lot
 def notify_signs(signs: list, state: bool):
     with database() as con:
         cur = con.cursor()
         for sign in signs:
-            print("Processing sign:")
-            print(sign)
             try:
                 response = requests.put(sign['url'], data=jsonify(state))
                 cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
@@ -100,6 +106,8 @@ def notify_signs(signs: list, state: bool):
                     })
             
 
+# view the state
+# clients can poll this
 @app.route(f"{API_URL}/state", methods=['GET'])
 def get_state():
     if os.path.isfile(STATE_FILE):
@@ -111,6 +119,8 @@ def get_state():
     else:
         return jsonify(False)
 
+# lets a client set the state.
+# body: json boolean
 @app.route(f"{API_URL}/state", methods=['PUT'])
 def set_state():
     old_state = get_state()
@@ -121,6 +131,9 @@ def set_state():
     
     return jsonify(changed)
 
+# signs can register for push notifications
+# returns current state so sign can set itself properly
+# body: json string, a url to json boolean state updates to
 @app.route(f"{API_URL}/register", methods=['POST'])
 def register():
     # get desired callback point (should parse to a url)
@@ -128,7 +141,7 @@ def register():
 
     register_sign(client_text, True)
 
-    return jsonify(get_signs())
+    return get_state()
 
 if __name__ == '__main__':
     init_db()
