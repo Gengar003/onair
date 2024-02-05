@@ -1,3 +1,4 @@
+import importlib
 import json
 import subprocess
 import time
@@ -16,12 +17,14 @@ parser.add_argument('-s', '--server', type=str, default=DEFAULT_SERVER, help='Th
 parser.add_argument('-t', '--toggle', type=str, action='append', required=True, help='Paths to toggle files to use to toggle status')
 args = parser.parse_args()
 
-API_URL = f"{args['server']}{API_BASE}/{API_VERSION}"
+API_URL = f"{args.server}{API_BASE}/{API_VERSION}"
 
 def changed_oncall(to):
     requests.put(f"{API_URL}/state", data=json.dumps(to))
     return to
 
-for toggle in args['toggle']:
+for toggle in args.toggle:
     print("Togle: " + toggle)
+    newmod = importlib.import_module(toggle)
+    newmod.run_and_call(changed_oncall)
     
