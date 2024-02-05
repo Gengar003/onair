@@ -6,6 +6,7 @@ import time
 import validators
 import requests
 import argparse
+import socket
 
 from flask import Flask, jsonify, request
 
@@ -15,16 +16,34 @@ API_BASE = "/onair/api"
 API_VERSION = "v1"
 API_URL = f"{API_BASE}/{API_VERSION}"
 
+hostname = socket.getfqdn()
+ip = socket.gethostbyname_ex(hostname)[2][1]
+
 parser = argparse.ArgumentParser(
     prog='sign.py',
     description="A sign that can be toggled on or off"
 )
 parser.add_argument('-s', '--server', type=str, help='The full server endpoint URL to register with for push updates.')
+parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
+parser.add_argument('-h', '--host', type=str, default=ip, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
 parser.add_argument('-c', '--command', nargs='+', type=str, help="Command to execute when toggled. %STATUS%, if present, will be replaced with `true' or `false'.")
 parser.add_argument('-i', '--idempotent', action='store_true', help="If it is safe to call the --command on every state update. If false (default), commands only run when state CHANGES according to the sign's own memory.")
 args = parser.parse_args()
 
 app = Flask(__name__)
+
+
+# register this sign with a server
+def register(server, host, port):
+    my_url = f"http://{host}:{port}{API_URL}"
+    print(f"Registering {my_url} with server {server}...")
+
+    requests.post(f"{server}",data=my_url)
+
+# run the cmds when the state changes
+def run_state_cmds(old_state):
+    print("run_state_cmds not implemented yet!")
+    pass
 
 # change the server's state
 def state_change(old, new):
@@ -61,25 +80,14 @@ def set_state():
     old_state = get_state()
     new_state = json.loads(request.data.decode('utf-8'))
 
-    changed = state_change(old_state, new_state)
-    run_state_cmds
+    state_change(old_state, new_state)
+
+    if old_state is not new_state or args.idempotent:
+        run_state_cmds(new_state)
     
-    return jsonify(changed)
+    return jsonify(new_state)
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
-
-
-
-
-# register this sign with a server
-def register(server):
-    pass
-
-# run the cmds when the state changes
-def run_state_cmds(state):
-    pass
-
-# get a push notif from the server
-def receive_push():
-    pass
+    if args.server:
+        register(args.server, args.host, args.port)
+    app.run(debug=True, host="0.0.0.0", port=args.port)

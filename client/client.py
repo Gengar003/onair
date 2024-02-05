@@ -1,7 +1,5 @@
 import importlib
 import json
-import subprocess
-import time
 import requests
 import argparse
 
@@ -24,7 +22,8 @@ def changed_oncall(to):
     return to
 
 for toggle in args.toggle:
-    print("Togle: " + toggle)
+    print("Toggle selected: " + toggle)
     newmod = importlib.import_module(toggle)
+    # TODO: this is not parallel, can only work with one toggle for now
     newmod.run_and_call(changed_oncall)
     
