@@ -13,13 +13,21 @@ try:
 
     # enable non-blocking mode
     h.set_nonblocking(1)
+    # VID and PID number of the relay's module:
+    # VID: 5131
+    # PID: 2007
+    # Generally, it is a fixed value and does not need to be changed.
 
+    # Communication protocol description:
+    # Default communication baud rate: 9600BPS
+    # Turn on the 1-channel relay switch: A0 01 01 A2
+    # Turn off the 1-channel relay switch: A0 01 00 A1
     # write some data to the device
     print("Write the data")
-    h.write([0, 63, 35, 35] + [0] * 61)
+    h.write([0xA0, 0x01, 0x01, 0xA2]) # open
 
     # wait
-    time.sleep(0.05)
+    time.sleep(1)
 
     # read back the answer
     print("Read the data")
@@ -30,7 +38,10 @@ try:
         else:
             break
 
+    time.sleep(1)
     print("Closing the device")
+    
+    h.write([0xA0, 0x01, 0x00, 0xA1]) # close
     h.close()
 
 except IOError as ex:
