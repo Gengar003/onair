@@ -39,10 +39,14 @@ def get_local_ip():
 
 # register this sign with a server
 def register(server, host, port):
-    my_url = f"http://{host}:{port}{API_URL}"
+    my_url = f"http://{host}:{port}{API_URL}/state"
     print(f"Registering {my_url} with server {server}...")
 
     server_state = requests.post(f"{server}",json=my_url)
+    print('response:')
+    print(server_state.text())
+    print('response_json: ')
+    print(server_state.json())
     server_state_json = server_state.json()
     state_change(retrieve_state(), server_state_json)
 
