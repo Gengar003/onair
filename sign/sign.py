@@ -97,6 +97,11 @@ if __name__ == '__main__':
         if not args.host:
             local_host = get_local_ip()
     
+    print(args.port)
+    print(args.server)
+    print(local_host)
+    print(args.idempotent)
+
     params = f"""
 Listen on port: {args.port}
 Register with server: {args.server}
@@ -105,10 +110,7 @@ Toggle Command: {args.command}
     idempotent? {args.idempotent}
 """
     
-    print(args.port)
-    print(args.server)
-    print(local_host)
-    print(args.idempotent)
+    
 
     print(params)
 
