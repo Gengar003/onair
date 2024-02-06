@@ -105,7 +105,7 @@ if __name__ == '__main__':
     params = f"""
 Listen on port: {args.port}
 Register with server: {args.server}
-    {("registered host: " + {local_host} + ":" + {args.port}) if args.server else ""}
+    {("registered host: " + local_host + ":" + args.port) if args.server else ""}
 Toggle Command: {args.command}
     idempotent? {args.idempotent}
 """
