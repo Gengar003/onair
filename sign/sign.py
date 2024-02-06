@@ -39,10 +39,11 @@ def get_local_ip():
 
 # register this sign with a server
 def register(server, host, port):
-    my_url = f"http://{host}:{port}{API_URL}/register"
+    my_url = f"http://{host}:{port}{API_URL}"
     print(f"Registering {my_url} with server {server}...")
 
-    requests.post(f"{server}",data=my_url)
+    server_state = requests.post(f"{server}",data=my_url)
+    state_change(server_state)
 
 # run the cmds when the state changes
 def run_state_cmds(old_state):
