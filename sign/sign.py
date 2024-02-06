@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('-s', '--server', type=str, help='The full server endpoint URL to register with for push updates.')
 parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
-parser.add_argument('-h', '--host', type=str, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
+parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
 parser.add_argument('-c', '--command', nargs='+', type=str, help="Command to execute when toggled. %STATUS%, if present, will be replaced with `true' or `false'.")
 parser.add_argument('-i', '--idempotent', action='store_true', help="If it is safe to call the --command on every state update. If false (default), commands only run when state CHANGES according to the sign's own memory.")
 args = parser.parse_args()
@@ -92,8 +92,22 @@ def set_state():
     return jsonify(new_state)
 
 if __name__ == '__main__':
+    local_host = args.host
     if args.server:
         if not args.host:
-            host = get_local_ip()
-        register(args.server, args.host if args.host else host, args.port)
+            local_host = get_local_ip()
+    
+    params = f"""
+Listen on port: {args.port}
+Register with server: {args.server}
+    {("registered host: " + {local_host} + ":" + {args.port}) if args.server else ""}
+Toggle Command: {args.command}
+    idempotent? {args.idempotent}
+"""
+    
+    print(params)
+
+    if args.server:
+        register(args.server, local_host, args.port)
+    
     app.run(debug=True, host="0.0.0.0", port=args.port)
