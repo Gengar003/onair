@@ -42,7 +42,7 @@ def register(server, host, port):
     my_url = f"http://{host}:{port}{API_URL}"
     print(f"Registering {my_url} with server {server}...")
 
-    server_state = requests.post(f"{server}",data=my_url)
+    server_state = requests.post(f"{server}",json=my_url)
     server_state_json = server_state.json()
     state_change(retrieve_state(), server_state_json)
 
