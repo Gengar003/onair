@@ -5,6 +5,7 @@ import sqlite3
 import time
 import validators
 import requests
+import traceback
 
 from flask import Flask, jsonify, request
 
@@ -93,6 +94,7 @@ def notify_signs(signs: list, state: bool):
                     "date": int(time.time())
                 })
             except BaseException as be:
+                print(traceback.format_exc())
                 if sign['num_failures'] + 1 >= MAX_FAILURES:
                     print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
                     cur.execute("DELETE FROM signs WHERE url=:url LIMIT 1", {
