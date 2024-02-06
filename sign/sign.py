@@ -39,7 +39,7 @@ def get_local_ip():
 
 # register this sign with a server
 def register(server, host, port):
-    my_url = f"http://{host}:{port}{API_URL}"
+    my_url = f"http://{host}:{port}{API_URL}/register"
     print(f"Registering {my_url} with server {server}...")
 
     requests.post(f"{server}",data=my_url)
