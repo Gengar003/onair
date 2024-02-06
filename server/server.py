@@ -128,6 +128,9 @@ def set_state():
     old_state = get_state()
     new_state = json.loads(request.data.decode('utf-8'))
 
+    print("new state from put request:")
+    print(str(new_state))
+
     changed = state_change(old_state, new_state)
     notify_signs(get_signs(), changed)
     
