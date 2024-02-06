@@ -43,7 +43,8 @@ def register(server, host, port):
     print(f"Registering {my_url} with server {server}...")
 
     server_state = requests.post(f"{server}",data=my_url)
-    state_change(retrieve_state(), server_state)
+    server_state_json = server_state.json()
+    state_change(retrieve_state(), server_state_json)
 
 # run the cmds when the state changes
 def run_state_cmds(old_state):
