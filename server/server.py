@@ -140,6 +140,7 @@ def register():
     client_text = json.loads(request.data.decode('utf-8'))
 
     register_sign(client_text, True)
+    print(f"Registered a sign at {client_text}")
 
     return get_state()
 
