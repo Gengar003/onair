@@ -73,7 +73,10 @@ def retrieve_state():
     if os.path.isfile(STATE_FILE):
         print(f"State file {STATE_FILE} exists...")
         with open(STATE_FILE, "r") as state_file:
-            state_data = json.load(state_file)
+            try:
+                state_data = json.load(state_file)
+            except:
+                state_data = False
         print(f"State data: {state_data}")
         return state_data
     else:
