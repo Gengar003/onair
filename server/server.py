@@ -88,7 +88,7 @@ def notify_signs(signs: list, state: bool):
         cur = con.cursor()
         for sign in signs:
             try:
-                response = requests.put(sign['url'], data=jsonify(state))
+                response = requests.put(sign['url'], json=state)
                 cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
                     "url": sign['url'],
                     "date": int(time.time())
@@ -127,9 +127,6 @@ def get_state():
 def set_state():
     old_state = get_state()
     new_state = json.loads(request.data.decode('utf-8'))
-
-    print("new state from put request:")
-    print(str(new_state))
 
     changed = state_change(old_state, new_state)
     notify_signs(get_signs(), changed)
