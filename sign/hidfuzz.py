@@ -1,4 +1,5 @@
 import hid
+import time
 
 try:
     print("Opening the device")
