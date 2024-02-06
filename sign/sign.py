@@ -44,7 +44,7 @@ def register(server, host, port):
 
     server_state = requests.post(f"{server}",json=my_url)
     print('response:')
-    print(server_state.text())
+    print(server_state.text)
     print('response_json: ')
     print(server_state.json())
     server_state_json = server_state.json()
