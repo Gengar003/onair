@@ -4,7 +4,6 @@ import subprocess
 import requests
 import argparse
 import socket
-import flask
 
 from flask import Flask, jsonify, request
 
@@ -106,6 +105,11 @@ Toggle Command: {args.command}
     idempotent? {args.idempotent}
 """
     
+    print(args.port)
+    print(args.server)
+    print(local_host)
+    print(args.idempotent)
+
     print(params)
 
     if args.server:
