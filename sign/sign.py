@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(
     prog='sign.py',
     description="A sign that can be toggled on or off"
 )
-parser.add_argument('-s', '--server', type=str, help='The full server endpoint URL to register with for push updates.')
+parser.add_argument('-r', '--register', type=str, help='The full server endpoint URL to register with for push updates.')
 parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
 parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
 parser.add_argument('-c', '--command', nargs='+', type=str, help="Command to execute when toggled. %STATUS%, if present, will be replaced with `true' or `false'.")
@@ -43,7 +43,7 @@ def register(server, host, port):
     print(f"Registering {my_url} with server {server}...")
 
     server_state = requests.post(f"{server}",data=jsonify(my_url))
-    state_change(get_state(), server_state)
+    state_change(retrieve_state(), server_state)
 
 # run the cmds when the state changes
 def run_state_cmds(old_state):
@@ -65,18 +65,21 @@ def state_change(old, new):
         state_file.write(json.dumps(new))
     return new
 
-# view the state
-# you can check on your sign
-@app.route(f"{API_URL}/state", methods=['GET'])
-def get_state():
+def retrieve_state():
     if os.path.isfile(STATE_FILE):
         print(f"State file {STATE_FILE} exists...")
         with open(STATE_FILE, "r") as state_file:
             state_data = json.load(state_file)
         print(f"State data: {state_data}")
-        return jsonify(state_data)
+        return state_data
     else:
-        return jsonify(False)
+        return False
+
+# view the state
+# you can check on your sign
+@app.route(f"{API_URL}/state", methods=['GET'])
+def get_state():
+    return jsonify(retrieve_state())
 
 # llet you set the state
 # body: json boolean
@@ -94,14 +97,14 @@ def set_state():
 
 if __name__ == '__main__':
     local_host = args.host
-    if args.server:
+    if args.register:
         if not args.host:
             local_host = get_local_ip()
 
     params = f"""
 Listen on port: {args.port}
-Register with server: {args.server}
-    {("registered host: " + local_host + ":" + str(args.port)) if args.server else ""}
+Register at endpoint: {args.register}
+    {("registered host: " + local_host + ":" + str(args.port)) if args.register else ""}
 Toggle Command: {args.command}
     idempotent? {args.idempotent}
 """
@@ -110,7 +113,7 @@ Toggle Command: {args.command}
 
     print(params)
 
-    if args.server:
-        register(args.server, local_host, args.port)
+    if args.register:
+        register(args.register, local_host, args.port)
     
     app.run(debug=True, host="0.0.0.0", port=args.port)
