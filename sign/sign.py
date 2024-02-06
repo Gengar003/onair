@@ -97,10 +97,10 @@ if __name__ == '__main__':
         if not args.host:
             local_host = get_local_ip()
     
-    print(str(args.port) + type(args.port))
-    print(str(args.server) + type(args.server))
-    print(str(local_host) + type(local_host))
-    print(str(args.idempotent) + type(args.idempotent))
+    print(str(args.port) + str(type(args.port)))
+    print(str(args.server) +  str(type(args.server)))
+    print(str(local_host) + str( type(local_host)))
+    print(str(args.idempotent) +  str(type(args.idempotent)))
 
     params = f"""
 Listen on port: {args.port}
