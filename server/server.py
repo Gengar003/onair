@@ -84,29 +84,33 @@ def get_signs(newer_than=None):
 # notify all signs
 # drop any that have failed a lot
 def notify_signs(signs: list, state: bool):
-    with database() as con:
-        cur = con.cursor()
-        for sign in signs:
-            try:
-                response = requests.put(sign['url'], json=state)
+    for sign in signs:
+        try:
+            response = requests.put(sign['url'], json=state)
+            with database() as con:
+                cur = con.cursor()
                 cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
                     "url": sign['url'],
                     "date": int(time.time())
                 })
-            except BaseException as be:
-                print(traceback.format_exc())
-                if sign['num_failures'] + 1 >= MAX_FAILURES:
-                    print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
+        except BaseException as be:
+            print(traceback.format_exc())
+            if sign['num_failures'] + 1 >= MAX_FAILURES:
+                print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
+                with database() as con:
+                    cur = con.cursor()
                     cur.execute("DELETE FROM signs WHERE url=:url LIMIT 1", {
                         "url": sign['url']
                     } )
-                else:
-                    print(f"Sign {sign['url']} failed; incrementing its failure count to [{sign['num_failures']+1}].")
+            else:
+                print(f"Sign {sign['url']} failed; incrementing its failure count to [{sign['num_failures']+1}].")
+                with database() as con:
+                    cur = con.cursor()
                     res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
                         "url": sign['url'],
                         "date": int(time.time())
                     })
-            
+        
 
 # view the state
 # clients can poll this
