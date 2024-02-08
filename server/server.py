@@ -169,4 +169,6 @@ def register():
 
 if __name__ == '__main__':
     init_db()
+    print(f"State: {retrieve_state()}")
+    print(f"Signs: {get_signs()}")
     app.run(debug=True, host="0.0.0.0", port=args.port)
