@@ -38,7 +38,7 @@ def init_db():
             cur.execute(db_init_file.read())
 
 # change the server's state
-def state_change(old, new):
+def state_change(old: bool, new: bool):
     
     # TODO: actually evince the change
     message = "offline"
