@@ -86,6 +86,7 @@ def get_signs(newer_than=None):
 def notify_signs(signs: list, state: bool):
     for sign in signs:
         response = None
+        print(f"Notifying sign at {sign['url']}...")
         try:
             response = requests.put(sign['url'], json=state)
         except BaseException as be:
