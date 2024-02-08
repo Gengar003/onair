@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(
     description="A server that can push updates to multiple 'on-air' signs."
 )
 parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
-parser.parse_args()
+args = parser.parse_args()
 
 app = Flask(__name__)
 
