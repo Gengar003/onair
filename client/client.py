@@ -16,11 +16,12 @@ args = parser.parse_args()
 
 def changed_oncall(to: bool):
     try:
-        requests.put(args.push, data=json.dumps(to))
-        return to
+        requests.put(args.push, data=json.dumps(to), timeout=10)
     except BaseException as be:
         print(traceback.format_exc())
-        return not to
+
+    return to
+    # TODO need to toggle better if fail
 
 for toggle in args.toggle:
     print("Toggle selected: " + toggle)
