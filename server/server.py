@@ -136,7 +136,7 @@ def get_state():
 @app.route(f"{API_URL}/state", methods=['PUT'])
 def set_state():
     old_state = retrieve_state()
-    new_state = json.loads(request.data.decode('utf-8')).value
+    new_state = json.loads(request.data.decode('utf-8'))
 
     changed = state_change(old_state, new_state)
     notify_signs(get_signs(), changed)
