@@ -112,25 +112,31 @@ def notify_signs(signs: list, state: bool):
                     })
         
 
-# view the state
-# clients can poll this
-@app.route(f"{API_URL}/state", methods=['GET'])
-def get_state():
+def retrieve_state():
     if os.path.isfile(STATE_FILE):
         print(f"State file {STATE_FILE} exists...")
         with open(STATE_FILE, "r") as state_file:
-            state_data = json.load(state_file)
+            try:
+                state_data = json.load(state_file)
+            except:
+                state_data = False
         print(f"State data: {state_data}")
-        return jsonify(state_data)
+        return state_data
     else:
-        return jsonify(False)
+        return False
+
+# view the state
+# you can check on your sign
+@app.route(f"{API_URL}/state", methods=['GET'])
+def get_state():
+    return jsonify(retrieve_state())
 
 # lets a client set the state.
 # body: json boolean
 @app.route(f"{API_URL}/state", methods=['PUT'])
 def set_state():
-    old_state = get_state()
-    new_state = json.loads(request.data.decode('utf-8'))
+    old_state = retrieve_state()
+    new_state = json.loads(request.data.decode('utf-8')).value
 
     changed = state_change(old_state, new_state)
     notify_signs(get_signs(), changed)
