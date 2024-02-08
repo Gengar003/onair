@@ -2,6 +2,7 @@ import importlib
 import json
 import requests
 import argparse
+import traceback
 
 parser = argparse.ArgumentParser(
     prog='client.py',
@@ -13,9 +14,13 @@ args = parser.parse_args()
 
 
 
-def changed_oncall(to):
-    requests.put(args.push, data=json.dumps(to))
-    return to
+def changed_oncall(to: bool):
+    try:
+        requests.put(args.push, data=json.dumps(to))
+        return to
+    except BaseException as be:
+        print(traceback.format_exc())
+        return not to
 
 for toggle in args.toggle:
     print("Toggle selected: " + toggle)
