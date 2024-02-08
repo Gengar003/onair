@@ -26,6 +26,8 @@ try:
     print("Write the data")
     h.write([0xA0, 0x01, 0x01, 0xA2]) # open
 
+    # note to self sudo hidapitester --device 5131/2007 --open --send-output "0xA0,0x01,0x00,0xA1"
+
     # wait
     time.sleep(1)
 

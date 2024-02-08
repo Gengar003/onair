@@ -4,6 +4,7 @@ import subprocess
 import requests
 import argparse
 import socket
+import subproces
 
 from flask import Flask, jsonify, request
 
@@ -20,7 +21,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-r', '--register', type=str, help='The full server endpoint URL to register with for push updates.')
 parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
 parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
-parser.add_argument('-c', '--command', nargs='+', type=str, help="Command to execute when toggled. %STATUS%, if present, will be replaced with `true' or `false'.")
+parser.add_argument('-o', '--on-command', nargs='+', type=str, help="Command to execute when toggled ON. Synchronous.")
+parser.add_argument('-f', '--off-command', nargs='+', type=str, help="Command to execute when toggled OFF. Synchronous.")
 parser.add_argument('-i', '--idempotent', action='store_true', help="If it is safe to call the --command on every state update. If false (default), commands only run when state CHANGES according to the sign's own memory.")
 args = parser.parse_args()
 
@@ -51,9 +53,12 @@ def register(server, host, port):
     state_change(retrieve_state(), server_state_json)
 
 # run the cmds when the state changes
-def run_state_cmds(old_state):
-    print("run_state_cmds not implemented yet!")
-    pass
+def run_state_cmds(new_state):
+    if new_state:
+        subprocess.call(args.on_command)
+    else:
+        subprocess.call(args.off_command)
+
 
 # change the server's state
 def state_change(old, new):
@@ -112,7 +117,9 @@ if __name__ == '__main__':
 Listen on port: {args.port}
 Register at endpoint: {args.register}
     {("registered host: " + local_host + ":" + str(args.port)) if args.register else ""}
-Toggle Command: {args.command}
+Toggle Commands:
+    ON : {args.on_command}
+    OFF: {args.off_command}
     idempotent? {args.idempotent}
 """
 
