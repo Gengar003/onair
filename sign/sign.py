@@ -23,7 +23,7 @@ parser.add_argument('-p', '--port', type=int, default=5000, help='The port to li
 parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
 parser.add_argument('-c', '--command', nargs=argparse.REMAINDER, type=str, help="Command to execute when toggled. %STATUS%, if present, will be replaced with `true' or `false'.")
 parser.add_argument('-i', '--idempotent', action='store_true', help="If it is safe to call the --command on every state update. If false (default), commands only run when state CHANGES according to the sign's own memory.")
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
 
 app = Flask(__name__)
 
@@ -112,16 +112,16 @@ if __name__ == '__main__':
         if not args.host:
             local_host = get_local_ip()
 
-    on_command = args.command.replace("%STATUS%", "true")
-    off_command = args.command.replace("%STATUS%", "false")
+    on_command = unknown.replace("%STATUS%", "true")
+    off_command = unknown.replace("%STATUS%", "false")
 
     params = f"""
 Listen on port: {args.port}
 Register at endpoint: {args.register}
     {("registered host: " + local_host + ":" + str(args.port)) if args.register else ""}
 Toggle Commands:
-    ON : {args.on_command}
-    OFF: {args.off_command}
+    ON : {on_command}
+    OFF: {off_command}
     idempotent? {args.idempotent}
 """
 
