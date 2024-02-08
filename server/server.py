@@ -85,6 +85,7 @@ def get_signs(newer_than=None):
 # drop any that have failed a lot
 def notify_signs(signs: list, state: bool):
     for sign in signs:
+        response = None
         try:
             response = requests.put(sign['url'], json=state)
         except BaseException as be:
