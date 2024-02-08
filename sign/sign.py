@@ -112,6 +112,9 @@ if __name__ == '__main__':
         if not args.host:
             local_host = get_local_ip()
 
+    on_command = args.command.replace("%STATUS%", "true")
+    off_command = args.command.replace("%STATUS%", "false")
+
     params = f"""
 Listen on port: {args.port}
 Register at endpoint: {args.register}
