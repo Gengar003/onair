@@ -46,6 +46,7 @@ def register(server, host, port):
     server_state = requests.post(f"{server}",json=my_url)
     server_state_json = server_state.json()
     state_change(retrieve_state(), server_state_json)
+    return server_state_json
 
 # run the cmds when the state changes
 def run_state_cmds(new_state):
@@ -54,7 +55,7 @@ def run_state_cmds(new_state):
 
 
 # change the server's state
-def state_change(old, new):
+def state_change(old: bool, new:bool):
     
     message = "offline"
     if new:
@@ -122,6 +123,7 @@ Toggle Commands:
     print(params)
 
     if args.register:
-        register(args.register, local_host, args.port)
+        new_state = register(args.register, local_host, args.port)
+        run_state_cmds(new_state)
     
     app.run(debug=True, host="0.0.0.0", port=args.port)
