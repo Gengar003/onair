@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-r', '--register', type=str, help='The full server endpoint URL to register with for push updates.')
 parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
 parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
-parser.add_argument('-c', '--command', nargs=argparse.REMAINDER, type=str, help="Command to execute when toggled. #STATUS#, if present, will be replaced with `true' or `false'.")
+parser.add_argument('-c', '--command', nargs=argparse.REMAINDER, type=str, help="Command to execute when toggled. @STATUS@, if present, will be replaced with `true' or `false'.")
 parser.add_argument('-i', '--idempotent', action='store_true', help="If it is safe to call the --command on every state update. If false (default), commands only run when state CHANGES according to the sign's own memory.")
 args, unknown = parser.parse_known_args()
 
@@ -50,7 +50,7 @@ def register(server:str, host:str, port: int):
 
 # run the cmds when the state changes
 def run_state_cmds(new_state: bool):
-    commands = [command_token.replace("#STATUS#", str(new_state).lower()) for command_token in unknown]
+    commands = [command_token.replace("@STATUS@", str(new_state).lower()) for command_token in unknown]
     print(commands)
     subprocess.call(commands)
 
@@ -108,8 +108,8 @@ if __name__ == '__main__':
         if not args.host:
             local_host = get_local_ip()
 
-    on_command = [command_token.replace("#STATUS#", "true") for command_token in unknown]
-    off_command = [command_token.replace("#STATUS#", "false") for command_token in unknown]
+    on_command = [command_token.replace("@STATUS@", "true") for command_token in unknown]
+    off_command = [command_token.replace("@STATUS@", "false") for command_token in unknown]
 
     params = f"""
 Listen on port: {args.port}
