@@ -112,8 +112,8 @@ if __name__ == '__main__':
         if not args.host:
             local_host = get_local_ip()
 
-    on_command = unknown.replace("%STATUS%", "true")
-    off_command = unknown.replace("%STATUS%", "false")
+    on_command = [command_token.replace("%STATUS%", "true") for command_token in unknown]
+    off_command = [command_token.replace("%STATUS%", "false") for command_token in unknown]
 
     params = f"""
 Listen on port: {args.port}
