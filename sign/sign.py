@@ -21,8 +21,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-r', '--register', type=str, help='The full server endpoint URL to register with for push updates.')
 parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
 parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
-parser.add_argument('-o', '--on-command', nargs='+', type=str, help="Command to execute when toggled ON. Synchronous.")
-parser.add_argument('-f', '--off-command', nargs='+', type=str, help="Command to execute when toggled OFF. Synchronous.")
+parser.add_argument('-c', '--command', nargs=argparse.REMAINDER, type=str, help="Command to execute when toggled. %STATUS%, if present, will be replaced with `true' or `false'.")
 parser.add_argument('-i', '--idempotent', action='store_true', help="If it is safe to call the --command on every state update. If false (default), commands only run when state CHANGES according to the sign's own memory.")
 args = parser.parse_args()
 
