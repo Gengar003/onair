@@ -6,6 +6,7 @@ import time
 import validators
 import requests
 import traceback
+import argparse
 
 from flask import Flask, jsonify, request
 
@@ -18,6 +19,13 @@ MAX_FAILURES=3
 API_BASE = "/onair/api"
 API_VERSION = "v1"
 API_URL = f"{API_BASE}/{API_VERSION}"
+
+parser = argparse.ArgumentParser(
+    prog='server.py',
+    description="A server that can push updates to multiple 'on-air' signs."
+)
+parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
+parser.parse_args()
 
 app = Flask(__name__)
 
@@ -161,4 +169,4 @@ def register():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0", port=args.port)

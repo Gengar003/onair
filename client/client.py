@@ -5,7 +5,7 @@ import argparse
 
 parser = argparse.ArgumentParser(
     prog='client.py',
-    description=""
+    description="Determines whether the current user is 'on-air' or not."
 )
 parser.add_argument('-p', '--push', type=str, required=True, help='The full server or sign endpoint URL to push statuses to.')
 parser.add_argument('-t', '--toggle', type=str, action='append', required=True, help='Paths to toggle files to use to toggle status')
