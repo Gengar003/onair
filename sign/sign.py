@@ -63,6 +63,9 @@ def state_change(old: bool, new:bool):
     
     banner = subprocess.check_output(f"banner {message}", shell=True).decode('utf-8')
     print(banner)
+
+    if old is not new or args.idempotent:
+        run_state_cmds(new)
     
     with open(STATE_FILE, "w") as state_file:
         state_file.write(json.dumps(new))
@@ -95,9 +98,6 @@ def set_state():
     new_state = json.loads(request.data.decode('utf-8'))
 
     state_change(old_state, new_state)
-
-    if old_state is not new_state or args.idempotent:
-        run_state_cmds(new_state)
     
     return jsonify(new_state)
 
@@ -123,7 +123,6 @@ Toggle Commands:
     print(params)
 
     if args.register:
-        new_state = register(args.register, local_host, args.port)
-        run_state_cmds(new_state)
+        register(args.register, local_host, args.port)
     
     app.run(debug=True, host="0.0.0.0", port=args.port)
