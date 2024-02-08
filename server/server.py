@@ -51,7 +51,7 @@ def state_change(old: bool, new: bool):
     with open(STATE_FILE, "w") as state_file:
         state_file.write(json.dumps(new))
 
-    print("Changed state from {old} -> {new}")
+    print(f"Changed state from {old} -> {new}")
 
     return new
 
@@ -70,10 +70,10 @@ def register_sign(url, state):
 
         if state:
             cur.execute("INSERT INTO signs(url, registered_ts) VALUES (:url, :date) ON CONFLICT(url) DO UPDATE SET registered_ts=:date", data)
-            print("Registered a sign at {url}")
+            print(f"Registered a sign at {url}")
         else:
             cur.execute("DELETE FROM signs WHERE url=:url", data)
-            print("Removed the sign at {url}")
+            print(f"Removed the sign at {url}")
 
     return state
 
@@ -145,7 +145,7 @@ def set_state():
     old_state = retrieve_state()
     new_state = json.loads(request.data.decode('utf-8'))
 
-    print("State update received: {new_state}")
+    print(f"State update received: {new_state}")
 
     changed = state_change(old_state, new_state)
 
