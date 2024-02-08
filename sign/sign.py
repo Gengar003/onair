@@ -51,6 +51,7 @@ def register(server, host, port):
 # run the cmds when the state changes
 def run_state_cmds(new_state):
     commands = [command_token.replace("%STATUS%", str(new_state).lower()) for command_token in unknown]
+    print(commands)
     subprocess.call(commands)
 
 
