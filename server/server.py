@@ -87,12 +87,6 @@ def notify_signs(signs: list, state: bool):
     for sign in signs:
         try:
             response = requests.put(sign['url'], json=state)
-            with database() as con:
-                cur = con.cursor()
-                cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
-                    "url": sign['url'],
-                    "date": int(time.time())
-                })
         except BaseException as be:
             print(traceback.format_exc())
             if sign['num_failures'] + 1 >= MAX_FAILURES:
@@ -110,6 +104,13 @@ def notify_signs(signs: list, state: bool):
                         "url": sign['url'],
                         "date": int(time.time())
                     })
+        if response:
+            with database() as con:
+                cur = con.cursor()
+                cur.execute("UPDATE signs SET last_successful_ts=:date, num_failures=0 WHERE url=:url",{
+                    "url": sign['url'],
+                    "date": int(time.time())
+                })
         
 
 def retrieve_state():
