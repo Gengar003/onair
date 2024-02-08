@@ -47,17 +47,12 @@ def init_db():
 
 # change the server's state
 def state_change(old: bool, new: bool):
-    
-    # TODO: actually evince the change
-    message = "offline"
-    if new:
-        message = "ON AIR"
-    
-    banner = subprocess.check_output(f"banner {message}", shell=True).decode('utf-8')
-    print(banner)
-    
+
     with open(STATE_FILE, "w") as state_file:
         state_file.write(json.dumps(new))
+
+    print("Changed state from {old} -> {new}")
+
     return new
 
 # register a new sign for push notifications
@@ -75,8 +70,10 @@ def register_sign(url, state):
 
         if state:
             cur.execute("INSERT INTO signs(url, registered_ts) VALUES (:url, :date) ON CONFLICT(url) DO UPDATE SET registered_ts=:date", data)
+            print("Registered a sign at {url}")
         else:
             cur.execute("DELETE FROM signs WHERE url=:url", data)
+            print("Removed the sign at {url}")
 
     return state
 
@@ -97,17 +94,18 @@ def notify_signs(signs: list, state: bool):
         print(f"Notifying sign at {sign['url']}...")
         try:
             response = requests.put(sign['url'], json=state)
+            print(f"    ... notified sign at {sign['url']}")
         except BaseException as be:
             print(traceback.format_exc())
             if sign['num_failures'] + 1 >= MAX_FAILURES:
-                print(f"Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
+                print(f"    Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
                 with database() as con:
                     cur = con.cursor()
                     cur.execute("DELETE FROM signs WHERE url=:url LIMIT 1", {
                         "url": sign['url']
                     } )
             else:
-                print(f"Sign {sign['url']} failed; incrementing its failure count to [{sign['num_failures']+1}].")
+                print(f"    Sign {sign['url']} failed; incrementing its failure count to [{sign['num_failures']+1}].")
                 with database() as con:
                     cur = con.cursor()
                     res = cur.execute("UPDATE signs SET num_failures=num_failures+1 WHERE url=:url RETURNING num_failures",{
@@ -125,13 +123,11 @@ def notify_signs(signs: list, state: bool):
 
 def retrieve_state():
     if os.path.isfile(STATE_FILE):
-        print(f"State file {STATE_FILE} exists...")
         with open(STATE_FILE, "r") as state_file:
             try:
                 state_data = json.load(state_file)
             except:
                 state_data = False
-        print(f"State data: {state_data}")
         return state_data
     else:
         return False
@@ -149,7 +145,10 @@ def set_state():
     old_state = retrieve_state()
     new_state = json.loads(request.data.decode('utf-8'))
 
+    print("State update received: {new_state}")
+
     changed = state_change(old_state, new_state)
+
     notify_signs(get_signs(), changed)
     
     return jsonify(changed)
@@ -162,10 +161,11 @@ def register():
     # get desired callback point (should parse to a url)
     client_text = json.loads(request.data.decode('utf-8'))
 
+    print(f"Registering a sign at {client_text} ...")
     register_sign(client_text, True)
-    print(f"Registered a sign at {client_text}")
+    current_state = retrieve_state()
 
-    return get_state()
+    return jsonify(current_state)
 
 if __name__ == '__main__':
     init_db()
