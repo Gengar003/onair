@@ -3,6 +3,7 @@ import json
 import requests
 import argparse
 import traceback
+import threading
 
 parser = argparse.ArgumentParser(
     prog='client.py',
@@ -17,15 +18,22 @@ args = parser.parse_args()
 def changed_oncall(to: bool):
     try:
         requests.put(args.push, data=json.dumps(to), timeout=10)
-    except BaseException as be:
+    except Exception as be:
         print(traceback.format_exc())
 
     return to
     # TODO need to toggle better if fail
 
+threads = list()
+
 for toggle in args.toggle:
     print("Toggle selected: " + toggle)
     newmod = importlib.import_module(toggle)
     # TODO: this is not parallel, can only work with one toggle for now
-    newmod.run_and_call(changed_oncall)
-    
+    t = threading.Thread(target=newmod.run_and_call, args=[changed_oncall])
+    t.start()
+    threads += [t]
+
+for t in threads:
+    t.join()
+
