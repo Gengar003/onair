@@ -56,3 +56,13 @@ python: pyenv deps
 	time pyenv install --verbose $(PYTHON_VERSION)
 	pyenv global $(PYTHON_VERSION)
 
+.PHONY: hidapitester
+hidapitester: /usr/local/bin/hidapitester
+
+/usr/local/bin/hidapitester:
+	wget https://github.com/todbot/hidapitester/releases/download/v0.5/hidapitester-linux-aarch64.zip -O /tmp/hidapitester.zip
+	cd /tmp && unzip /tmp/hidapitester
+	sudo cp /tmp/hidapitester /usr/local/bin/hidapitester
+	sudo chmod a+x /usr/local/bin/hidapitester
+	rm /tmp/hidapitester*
+
