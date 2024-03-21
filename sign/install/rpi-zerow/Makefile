@@ -1,3 +1,6 @@
+PIPENV_DEFAULT_PATH=$(HOME)/.local/bin/pipenv
+PIPENV_PATH=$(or $(shell which pipenv),$(PIPX_DEFAULT_PATH))
+
 PIPX_DEFAULT_PATH=/usr/bin/pipx
 PIPX_PATH=$(or $(shell which pipx),$(PIPX_DEFAULT_PATH))
 
@@ -48,7 +51,8 @@ $(PIPX_PATH):
 	pipx ensurepath
 
 .PHONY: pipenv
-pipenv: $(PIPX_PATH)
+pipenv: $(PIPENV_PATH)
+$(PIPENV_PATH): $(PIPX_PATH)
 	pipx install pipenv --force
 
 python: PYTHON_VERSION=3.10.3
@@ -66,3 +70,22 @@ hidapitester: /usr/local/bin/hidapitester
 	sudo chmod a+x /usr/local/bin/hidapitester
 	rm /tmp/hidapitester*
 
+/usr/local/bin/sign-state: sign-state /usr/local/bin/hidapitester
+	sudo cp -fv sign-state /usr/local/bin/sign-state
+
+.PHONY: systemd
+systemd: /etc/systemd/system/onair.service
+	sudo systemctl daemon-reload
+	sudo systemctl enable onair.service
+	sudo systemctl restart onair.service
+
+# LOCAL_PORT will default to a random, unused local port.
+/etc/systemd/system/onair.service: LOCAL_PORT=$(shell python -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
+/etc/systemd/system/onair.service: TEMPLATE.service pipenv /usr/local/bin/sign-state
+	@ if [ -z "$${REGISTER_URL}" ]; then echo "ERROR: Please specify a REGISTER_URL, e.g. \`make REGISTER_URL=... systemd'"; exit 1; fi
+	USER=$(USER) \
+	PIPENV_PATH=$(shell which pipenv) \
+	SIGN_SRC_PATH=$(shell realpath $(CURDIR)/../../src) \
+	LOCAL_PORT=$(LOCAL_PORT) \
+	envsubst < TEMPLATE.service > /tmp/onair.service
+	sudo cp /tmp/onair.service "$@"

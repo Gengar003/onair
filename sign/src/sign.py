@@ -62,8 +62,7 @@ def state_change(old: bool, new:bool):
     if new:
         message = "ON AIR"
     
-    banner = subprocess.check_output(f"banner {message}", shell=True).decode('utf-8')
-    print(banner)
+    print(message)
 
     if old is not new or args.idempotent:
         run_state_cmds(new)
