@@ -49,7 +49,7 @@ $(PIPX_PATH):
 
 .PHONY: pipenv
 pipenv: $(PIPX_PATH)
-	pipx install pipenv
+	pipx install pipenv --force
 
 python: PYTHON_VERSION=3.10.3
 python: pyenv deps
