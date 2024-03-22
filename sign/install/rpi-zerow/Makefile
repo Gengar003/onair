@@ -63,12 +63,17 @@ python: pyenv deps
 .PHONY: hidapitester
 hidapitester: /usr/local/bin/hidapitester
 
-/usr/local/bin/hidapitester:
+/usr/local/bin/hidapitester: /etc/udev/rules.d/10-usb.rules
 	wget https://github.com/todbot/hidapitester/releases/download/v0.5/hidapitester-linux-aarch64.zip -O /tmp/hidapitester.zip
 	cd /tmp && unzip /tmp/hidapitester
 	sudo cp /tmp/hidapitester /usr/local/bin/hidapitester
 	sudo chmod a+x /usr/local/bin/hidapitester
 	rm /tmp/hidapitester*
+
+/etc/udev/rules.d/10-usb.rules:
+	getent group usb || sudo groupadd usb
+	sudo usermod -aG usb $(USER)
+	sudo cp 10-usb.rules /etc/udev/rules.d/
 
 /usr/local/bin/sign-state: sign-state /usr/local/bin/hidapitester
 	sudo cp -fv sign-state /usr/local/bin/sign-state
