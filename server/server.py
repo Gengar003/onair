@@ -44,6 +44,7 @@ def init_db():
         with database() as con:
             cur = con.cursor()
             cur.execute(db_init_file.read())
+            cur.close()
 
 # change the server's state
 def state_change(old: bool, new: bool):
@@ -74,6 +75,8 @@ def register_sign(url, state):
         else:
             cur.execute("DELETE FROM signs WHERE url=:url", data)
             print(f"Removed the sign at {url}")
+        
+        cur.close()
 
     return state
 
@@ -83,6 +86,7 @@ def get_signs(newer_than=None):
         cur = con.cursor()
         res = cur.execute("SELECT * FROM signs WHERE last_successful_ts>=?", str(newer_than if newer_than is not None else 0))
         signs = res.fetchall()
+        cur.close()
     
     return [dict(row) for row in signs]
 
@@ -104,6 +108,7 @@ def notify_signs(signs: list, state: bool):
                     cur.execute("DELETE FROM signs WHERE url=:url LIMIT 1", {
                         "url": sign['url']
                     } )
+                    cur.close()
             else:
                 print(f"    Sign {sign['url']} failed; incrementing its failure count to [{sign['num_failures']+1}].")
                 with database() as con:
@@ -112,6 +117,7 @@ def notify_signs(signs: list, state: bool):
                         "url": sign['url'],
                         "date": int(time.time())
                     })
+                    cur.close()
         if response:
             with database() as con:
                 cur = con.cursor()
@@ -119,6 +125,7 @@ def notify_signs(signs: list, state: bool):
                     "url": sign['url'],
                     "date": int(time.time())
                 })
+                cur.close()
         
 
 def retrieve_state():
