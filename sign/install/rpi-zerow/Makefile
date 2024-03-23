@@ -1,5 +1,5 @@
 PIPENV_DEFAULT_PATH=$(HOME)/.local/bin/pipenv
-PIPENV_PATH=$(or $(shell which pipenv),$(PIPX_DEFAULT_PATH))
+PIPENV_PATH=$(or $(shell which pipenv),$(PIPENV_DEFAULT_PATH))
 
 PIPX_DEFAULT_PATH=/usr/bin/pipx
 PIPX_PATH=$(or $(shell which pipx),$(PIPX_DEFAULT_PATH))
@@ -7,12 +7,16 @@ PIPX_PATH=$(or $(shell which pipx),$(PIPX_DEFAULT_PATH))
 PYENV_DEFAULT_PATH=$(HOME)/.pyenv/bin/pyenv
 PYENV_PATH=$(or $(shell which pyenv),$(PYENV_DEFAULT_PATH))
 
-all: deps pyenv pipx python
+all: deps pyenv pipx #python # assume suitable python is already installed
 	$(MAKE) pipenv
 
 print-vars:
-	@echo "PIPX_DEFAULT_PATH: $(PIPX_DEFAULT_PATH)"
-	@echo "PIPX_PATH: $(PIPX_PATH)"
+	@echo "PYENV_DEFAULT_PATH  : $(PYENV_DEFAULT_PATH)"
+	@echo "PYENV_PATH          : $(PYENV_PATH)"
+	@echo "PIPX_DEFAULT_PATH   : $(PIPX_DEFAULT_PATH)"
+	@echo "PIPX_PATH           : $(PIPX_PATH)"
+	@echo "PIPENV_DEFAULT_PATH : $(PIPENV_DEFAULT_PATH)"
+	@echo "PIPENV_PATH         : $(PIPENV_PATH)"
 
 .PHONY: deps
 deps:
@@ -43,22 +47,23 @@ $(PYENV_PATH):
 		printf 'export PATH="$$HOME/.pyenv/bin:$$PATH"\neval "$$(pyenv init -)"\neval "$$(pyenv virtualenv-init -)"\n' >> ~/.bashrc; \
 	fi
 
-.PHONY: pipx python
+.PHONY: pipx
 pipx: $(PIPX_PATH)
 
 $(PIPX_PATH):
-	python -m pip install --user pipx
+	sudo apt-get install -y pipx
 	pipx ensurepath
 
 .PHONY: pipenv
 pipenv: $(PIPENV_PATH)
+
 $(PIPENV_PATH): $(PIPX_PATH)
 	pipx install pipenv --force
 
-python: PYTHON_VERSION=3.10.3
+python: PYTHON_VERSION=3.11.2
 python: pyenv deps
-	time pyenv install --verbose $(PYTHON_VERSION)
-	pyenv global $(PYTHON_VERSION)
+	time $(PYENV_PATH) install --verbose $(PYTHON_VERSION)
+	$(PYENV_PATH) global $(PYTHON_VERSION)
 
 .PHONY: hidapitester
 hidapitester: /usr/local/bin/hidapitester
