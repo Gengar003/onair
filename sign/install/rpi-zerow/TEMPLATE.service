@@ -1,0 +1,15 @@
+[Unit]
+Description=On-Air Sign
+After=network.target
+
+[Service]
+Type=exec
+User=iot
+Restart=always
+RestartSec=5
+
+WorkingDirectory=${SIGN_SRC_PATH}
+ExecStart=${PIPENV_PATH} run python sign.py --register ${REGISTER_URL} -p ${LOCAL_PORT} --idempotent ${INSTALL_DIR} /usr/local/bin/sign-state @STATUS@ ${VIDPID}
+
+[Install]
+WantedBy=multi-user.target

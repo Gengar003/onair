@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+VIDPID="${2:-5131/2007}"
+
+if [ "x$1" == "xtrue" ]; then
+        hidapitester --vidpid ${VIDPID} --open --send-output "0xA0,0x01,0x01,0xA2"
+else
+        hidapitester --vidpid ${VIDPID} --open --send-output "0xA0,0x01,0x00,0xA1"
+fi
