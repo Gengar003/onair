@@ -1,4 +1,15 @@
-# Run as PLIST
+On-Air Client
+==========
+
+This is the process that runs on human client machines, watching to see if the human has gone "On air."
+
+TODO:
+
+1. Guide for Launch Agent on Mac
+2. Architecture wrt Toggles
+3. Basic command usage
+
+# Run as PLIST on Mac
 
 `/Library/LaunchAgents/org.gengar.onair.plist`:
 
@@ -18,7 +29,7 @@
 		<string>python</string>
 		<string>watcher.py</string>
 		<string>--toggle</string>
-		<string>toggles.macos.video_conference_brave</string>
+		<string>toggles.macos.zoom</string>
 		<string>--push</string>
 		<string>http://YOURSERVER/onair/api/v1/state</string>
 	</array>
