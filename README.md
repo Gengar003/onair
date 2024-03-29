@@ -9,6 +9,21 @@ You can either have a single station (PC, laptop, etc) directly toggle a single 
 This was built for a Raspberry Pi Zero W - a cheap, low-power embeddable computer. However, it's not explicitly limited to the Raspberry Pi.
 Limited instructions will be provided where possible, but this is not an off-the-shelf product; you are expected to DIY.
 
+Getting Started
+==========
+
+1. Run the server somewhere
+    * see the [server README](./server) for details
+2. Run the sign code on the same machine, sign and tell it to register with your server
+    * see the [sign README](./sign) for details
+3. On the server, run
+    * `curl -X PUT -H "content-type: application-json" -d "true" http://localhost:5000/onair/api/v1/state` to turn the sign ON
+    * `curl -X PUT -H "content-type: application-json" -d "false" http://localhost:5000/onair/api/v1/state` to turn the sign OFF
+4. Run the client code on your actual client machine, pointed at your server
+    * see the [client README](./client) for details
+5. Build an IoT device that can run the sign code
+6. go on-air on your client, and watch your server tell your sign to turn on and off!
+
 Architecture
 ==========
 
@@ -67,18 +82,3 @@ sequenceDiagram
 If a sign comes online after a client, it will remain in its default state until the client pushes a new update. This means that if a sign crashes or restarts, once it comes back online it will stay OFF until the client goes offline and on again. This might seem like undesirable behavior!
 
 This is because the clients do not run a server and do not accept any internet connections from the outside world. Consider running an OnAir server somewhere for the most-reliable experience.
-
-Getting Started
-==========
-
-1. Run the server somewhere
-    * see the [server README](./server) for details
-2. Run the sign code on the same machine, sign and tell it to register with your server
-    * see the [sign README](./sign) for details
-3. On the server, run
-    * `curl -X PUT -H "content-type: application-json" -d "true" http://localhost:5000/onair/api/v1/state` to turn the sign ON
-    * `curl -X PUT -H "content-type: application-json" -d "false" http://localhost:5000/onair/api/v1/state` to turn the sign OFF
-4. Run the client code on your actual client machine, pointed at your server
-    * see the [client README](./client) for details
-5. Build an IoT device that can run the sign code
-6. go on-air on your client, and watch your server tell your sign to turn on and off!
