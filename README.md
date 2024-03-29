@@ -47,6 +47,8 @@ sequenceDiagram
     Note right of Sign B: Sign B turns off
 ```
 
+> Basically, you Sign A is an "On Air" sign outside your studio that you can't see, and Sign B is a sign inside your studio that you can see. And either one can be unplugged accidentally or on purpose, and will still work just fine as soon as it's plugged back in.
+
 Without Server
 ----------
 
