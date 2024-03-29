@@ -59,6 +59,8 @@ def run_and_call(callback, app_name, poll_interval_s=1, start_threshold=5, cpu_t
                     print("CALL ENDED")
                     on_call = callback(False)
                     continue
+                else:
+                    print("\t... BUT headset still connected!")
         
         if was_on_call == on_call:
             if on_call:
