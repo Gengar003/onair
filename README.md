@@ -79,6 +79,6 @@ sequenceDiagram
     deactivate Sign
 ```
 
-If a sign comes online after a client, it will remain in its default state until the client pushes a new update. This means that if a sign crashes or restarts, once it comes back online it will stay OFF until the client goes offline and on again. This might seem like undesirable behavior!
+If a sign comes online after a client, it will remain in its default state until the client pushes a new update. This means that if a sign crashes or restarts, once it comes back online it will stay OFF until the client goes offline and on again.
 
 This is because the clients do not run a server and do not accept any internet connections from the outside world. Consider running an OnAir server somewhere for the most-reliable experience.
