@@ -6,11 +6,12 @@ def is_any_bt_headset_connected():
     headset_types = ["Headphones", "Headset"]
     cmd="system_profiler -json SPBluetoothDataType"
     bt_devs = json.loads(subprocess.check_output(cmd, shell=True).decode('utf-8'))["SPBluetoothDataType"][0]
-    connected_devs = bt_devs["device_connected"]
-    for devobj in connected_devs:
-        for device, device_props in devobj.items():
-            if device_props["device_minorType"] in headset_types:
-                return True
+    if "device_connected" in bt_devs:
+        connected_devs = bt_devs["device_connected"]
+        for devobj in connected_devs:
+            for device_props in devobj.values():
+                if device_props["device_minorType"] in headset_types:
+                    return True
 
     return False
 
