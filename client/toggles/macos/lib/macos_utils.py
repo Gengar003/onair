@@ -1,5 +1,6 @@
-import subprocess
 import json
+import subprocess
+
 
 # determines if a bluetooth headset is connected
 def is_any_bt_headset_connected():
