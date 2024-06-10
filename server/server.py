@@ -1,6 +1,5 @@
 import os
 import json
-import subprocess
 import sqlite3
 import time
 import validators
