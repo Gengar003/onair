@@ -7,14 +7,15 @@ import utils
 
 def run_and_call(callback, browser_name, poll_interval_s=1, start_threshold=5, cpu_threshold=15):
 
-    try:
-        on_call = False
+    on_call = False
 
-        usages = list()
+    usages = list()
 
-        cpu_threshold_delta = 0
+    cpu_threshold_delta = 0
 
-        while True:
+    while True:
+
+        try:
 
             was_on_call = on_call
 
@@ -98,9 +99,11 @@ def run_and_call(callback, browser_name, poll_interval_s=1, start_threshold=5, c
                     print("Still on a call...")
                 else:
                     print("Not on a call...")
+
+        except BaseException as be:
+            utils.print_err("ERROR: {be.message()}")
+            utils.print_err(traceback.format_exc())
         
-    except BaseException as be:
-        utils.print_err("ERROR: {be.message()}")
-        utils.print_err(traceback.format_exc())
+    
 
     time.sleep(poll_interval_s)
